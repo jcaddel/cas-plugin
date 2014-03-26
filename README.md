@@ -5,4 +5,4 @@ Forked from the original, soley to quickly patch together a solution for users a
 
 http://stackoverflow.com/questions/17351842/how-do-i-return-multi-valued-attributes-using-jdbc
 
-If that question gets answered, this plugin can be removed
+If that question gets answered, this can (and should) be removed
