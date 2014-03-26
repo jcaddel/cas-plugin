@@ -17,8 +17,7 @@ import org.springframework.security.cas.authentication.CasAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
 /**
- * Listener for successful CAS authentication events, that maps Spring Security
- * Authentication to Acegi Security and syncs attributes with the corresponding Jenkins User.
+ * Listener for successful CAS authentication events, that maps Spring Security Authentication to Acegi Security and syncs attributes with the corresponding Jenkins User.
  * 
  * @author Fabien Crespel <fabien@crespel.net>
  */
@@ -32,17 +31,21 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Handle an application event.
-	 * @param event the event to respond to
+	 * 
+	 * @param event
+	 *            the event to respond to
 	 */
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event instanceof InteractiveAuthenticationSuccessEvent) {
-			onSuccessfulAuthentication(((InteractiveAuthenticationSuccessEvent)event).getAuthentication());
+			onSuccessfulAuthentication(((InteractiveAuthenticationSuccessEvent) event).getAuthentication());
 		}
 	}
 
 	/**
 	 * Successful authentication event handler.
-	 * @param authentication the successful authentication object
+	 * 
+	 * @param authentication
+	 *            the successful authentication object
 	 */
 	protected void onSuccessfulAuthentication(Authentication authentication) {
 		if (authentication instanceof CasAuthenticationToken) {
@@ -58,7 +61,9 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Map a Spring Security CAS authentication token into the Acegi SecurityContext.
-	 * @param casToken CAS authentication token
+	 * 
+	 * @param casToken
+	 *            CAS authentication token
 	 */
 	protected void copyToAcegiContext(CasAuthenticationToken casToken) {
 		// Map granted authorities
@@ -70,7 +75,8 @@ public class CasEventListener implements ApplicationListener {
 
 		// Map user
 		org.springframework.security.core.userdetails.User sourceUser = (org.springframework.security.core.userdetails.User) casToken.getUserDetails();
-		User user = new User(sourceUser.getUsername(), sourceUser.getPassword(), sourceUser.isEnabled(), sourceUser.isAccountNonExpired(), sourceUser.isCredentialsNonExpired(), sourceUser.isAccountNonLocked(), authorities);
+		User user = new User(sourceUser.getUsername(), sourceUser.getPassword(), sourceUser.isEnabled(), sourceUser.isAccountNonExpired(), sourceUser.isCredentialsNonExpired(),
+				sourceUser.isAccountNonLocked(), authorities);
 
 		// Build a CasAuthentication object
 		CasAuthentication authentication = new CasAuthentication(casToken.getKeyHash(), user, casToken.getCredentials(), authorities, user, casToken.getAssertion());
@@ -81,13 +87,13 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Sync user attributes with a CAS authentication token.
-	 * @param casToken CAS authentication token
+	 * 
+	 * @param casToken
+	 *            CAS authentication token
 	 * @throws IOException
 	 */
 	protected void syncUserAttributes(CasAuthenticationToken casToken) throws IOException {
-		if (casToken.getAssertion() == null ||
-			casToken.getAssertion().getPrincipal() == null ||
-			casToken.getAssertion().getPrincipal().getAttributes() == null) {
+		if (casToken.getAssertion() == null || casToken.getAssertion().getPrincipal() == null || casToken.getAssertion().getPrincipal().getAttributes() == null) {
 			// No attributes to sync with
 			return;
 		}
@@ -113,16 +119,17 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Retrieve an attribute's value from a CAS authentication token.
-	 * @param authToken CAS authentication token
-	 * @param attributeName attribute name
+	 * 
+	 * @param authToken
+	 *            CAS authentication token
+	 * @param attributeName
+	 *            attribute name
 	 * @return attribute value or null if not found
 	 */
 	@SuppressWarnings("rawtypes")
 	protected String getAttributeValue(CasAuthenticationToken authToken, String attributeName) {
-		if (authToken != null && authToken.getAssertion() != null &&
-			authToken.getAssertion().getPrincipal() != null &&
-			authToken.getAssertion().getPrincipal().getAttributes() != null &&
-			attributeName != null) {
+		if (authToken != null && authToken.getAssertion() != null && authToken.getAssertion().getPrincipal() != null
+				&& authToken.getAssertion().getPrincipal().getAttributes() != null && attributeName != null) {
 
 			Map attributes = authToken.getAssertion().getPrincipal().getAttributes();
 			Object attribute = attributes.get(attributeName);
@@ -135,6 +142,7 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Get the full name attribute name.
+	 * 
 	 * @return full name attribute name.
 	 */
 	public String getFullNameAttribute() {
@@ -143,7 +151,9 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Set the full name attribute name.
-	 * @param fullNameAttribute full name attribute name.
+	 * 
+	 * @param fullNameAttribute
+	 *            full name attribute name.
 	 */
 	public void setFullNameAttribute(String fullNameAttribute) {
 		if (fullNameAttribute == null) {
@@ -155,6 +165,7 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Get the email address attribute name.
+	 * 
 	 * @return email address attribute name.
 	 */
 	public String getEmailAttribute() {
@@ -163,7 +174,9 @@ public class CasEventListener implements ApplicationListener {
 
 	/**
 	 * Set the email address attribute name.
-	 * @param emailAttribute email address attribute name.
+	 * 
+	 * @param emailAttribute
+	 *            email address attribute name.
 	 */
 	public void setEmailAttribute(String emailAttribute) {
 		if (emailAttribute == null) {
