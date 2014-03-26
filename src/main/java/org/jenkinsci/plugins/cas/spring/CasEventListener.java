@@ -3,12 +3,16 @@ package org.jenkinsci.plugins.cas.spring;
 import hudson.tasks.Mailer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.acegisecurity.GrantedAuthority;
 import org.acegisecurity.GrantedAuthorityImpl;
 import org.acegisecurity.context.SecurityContextHolder;
 import org.acegisecurity.userdetails.User;
+import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.cas.Logger;
 import org.jenkinsci.plugins.cas.spring.security.CasAuthentication;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -59,6 +63,8 @@ public class CasEventListener implements ApplicationListener {
 		}
 	}
 
+	private static final GrantedAuthority[] EMPTY_AUTHORITY_ARRAY = {};
+
 	/**
 	 * Map a Spring Security CAS authentication token into the Acegi SecurityContext.
 	 * 
@@ -66,12 +72,18 @@ public class CasEventListener implements ApplicationListener {
 	 *            CAS authentication token
 	 */
 	protected void copyToAcegiContext(CasAuthenticationToken casToken) {
+		Logger.info("copyToAcegiContext()");
 		// Map granted authorities
-		GrantedAuthority[] authorities = new GrantedAuthority[casToken.getAuthorities().size()];
-		int i = 0;
+		List<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
 		for (org.springframework.security.core.GrantedAuthority authority : casToken.getAuthorities()) {
-			authorities[i++] = new GrantedAuthorityImpl(authority.getAuthority());
+			String[] tokens = StringUtils.split(authority.getAuthority(), ",");
+			for (String token : tokens) {
+				list.add(new GrantedAuthorityImpl(token.trim()));
+				Logger.info("copyToAcegiContext()", "authority[%s]=%s", list.size(), token);
+			}
 		}
+
+		GrantedAuthority[] authorities = list.toArray(EMPTY_AUTHORITY_ARRAY);
 
 		// Map user
 		org.springframework.security.core.userdetails.User sourceUser = (org.springframework.security.core.userdetails.User) casToken.getUserDetails();
